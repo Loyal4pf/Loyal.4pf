@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Net Pitch - Where Football IQ Rules</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+    .content-card {
+      background: rgba(255, 255, 255, 0.95);
+    }
+    .net-btn {
+      background: linear-gradient(135deg, #2E8B57, #3CB371);
+      color: white;
+      transition: all 0.3s;
+    }
+    .net-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(46, 139, 87, 0.3);
+    }
+    .iq-score::before {
+      content: "🧠";
+      margin-right: 4px;
+    }
+    [data-page] { display: none; }
+    [data-page="home"] { display: block; }
+    .koala-icon {
+      width: 40px;
+      height: 40px;
+      background: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='18' r='12' fill='%232E8B57'/%3E%3Cpath d='M16 28c0-2.2 1.8-4 4-4s4 1.8 4 4' stroke='white' stroke-width='2' fill='none'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3Ccircle cx='24' cy='16' r='3' fill='white'/%3E%3Cpath d='M12 12h16l-2 6H14z' fill='white'/%3E%3Cpath d='M10 20h20v2H10z' fill='%232E8B57'/%3E%3C/svg%3E") no-repeat center;
+    }
+    .reel-container {
+      height: 70vh;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+    }
+    .reel-item {
+      height: 70vh;
+      scroll-snap-align: start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .live-player {
+      width: 100%;
+      height: 60vh;
+      background: #000;
+      border-radius: 12px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .live-player video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .dark-mode {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    .comment-section {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .gallery-item {
+      width: 100px;
+      height: 100px;
+      background-size: cover;
+      background-position: center;
+      margin: 5px;
+      border-radius: 8px;
+    }
+    .user-profile {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 10px 0;
+    }
+    .like-btn {
+      color: #2E8B57 !important;
+    }
+    .net-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      color: #2E8B57;
+      opacity: 0;
+      z-index: 100;
+      pointer-events: none;
+      animation: netGoal 1.5s forwards;
+    }
+    @keyframes netGoal {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+    }
+    .player-card {
+      transition: all 0.3s;
+    }
+    .player-card.selected {
+      border: 3px solid #2E8B57;
+      transform: scale(1.03);
+    }
+    /* Dashboard */
+    .dashboard-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .dashboard-toggle i {
+      color: white;
+      font-size: 18px;
+    }
+    .dashboard {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      width: 280px;
+      background: rgba(0, 0, 0, 0.9);
+      border-radius: 15px;
+      padding: 15px;
+      z-index: 999;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      color: white;
+      font-size: 14px;
+      display: none;
+    }
+    .dashboard.show {
+      display: block;
+    }
+    .dashboard-menu {
+      margin-bottom: 15px;
+    }
+    .dashboard-btn {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      background: #2E8B57;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s;
+    }
+    .dashboard-btn:hover {
+      background: #3CB371;
+      transform: translateX(5px);
+    }
+    .live-links {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .live-links-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .refresh-btn {
+      background: #2E8B57;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .link-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+    .link-item a {
+      color: #3CB371;
+      text-decoration: none;
+    }
+    .link-item a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      .dashboard {
+        width: 90%;
+        right: 5%;
+        left: 5%;
+      }
+    }
+    /* Search Bar */
+    .search-container {
+      position: relative;
+      margin-bottom: 15px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+    }
+    /* Blocked Users Section */
+    .blocked-section {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .blocked-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .blocked-user {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .unblock-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .unblock-btn:hover {
+      background: #c82333;
+    }
+    /* Fan Zone Background */
+    .fan-zone-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: -1;
+      opacity: 0.1;
+      transition: background-image 1s ease-in-out;
+    }
+    .fan-zone-content {
+      position: relative;
+      z-index: 1;
+    }
+    .transparent-post {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+
+  <!-- Net Animation -->
+  <div id="net-animation" class="net-animation">
+    <i class="fas fa-futbol"></i>
+  </div>
+
+  <!-- Fan Zone Background -->
+  <div class="fan-zone-bg" id="fan-zone-bg"></div>
+
+  <!-- Dashboard Toggle -->
+  <div id="dashboard-toggle" class="dashboard-toggle">
+    <i class="fas fa-ellipsis-v"></i>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="dashboard">
+    <div class="dashboard-menu">
+      <button class="dashboard-btn" onclick="showPage('tv-room')"><i class="fas fa-tv mr-2"></i> TV Room</button>
+      <button class="dashboard-btn" onclick="showPage('reels')"><i class="fas fa-film mr-2"></i> Reels</button>
+      <button class="dashboard-btn" onclick="showPage('fan-zone')"><i class="fas fa-comments mr-2"></i> Fan Zone</button>
+      <button class="dashboard-btn" onclick="showPage('vault')"><i class="fas fa-wallet mr-2"></i> Mini Vault</button>
+      <button class="dashboard-btn" onclick="showPage('profile')"><i class="fas fa-user mr-2"></i> Profile</button>
+      <button class="dashboard-btn" onclick="showPage('premium')"><i class="fas fa-star mr-2"></i> Premium</button>
+      <button class="dashboard-btn" onclick="showPage('store')"><i class="fas fa-store mr-2"></i> Store</button>
+      <button class="dashboard-btn" onclick="showPage('live')"><i class="fas fa-video mr-2"></i> Go Live</button>
+    </div>
+    <div class="live-links">
+      <div class="live-links-header">
+        <h4 class="font-semibold">Live Links</h4>
+        <button id="refresh-links" class="refresh-btn"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+      </div>
+      <div id="live-links-container">
+        <div class="link-item">
+          <strong>Link 1:</strong> 
+          <a href="https://netpitch.africa/live/arsenal-manutd" target="_blank">arsenal-manutd</a>
+        </div>
+        <div class="link-item">
+          <strong>Link 2:</strong> 
+          <a href="https://netpitch.africa/live/gor-afc" target="_blank">gor-afc</a>
+        </div>
+        <div class="link-item">
+          <strong>Link 3:</strong> 
+          <a href="https://netpitch.africa/live/barca-madrid" target="_blank">barca-madrid</a>
+        </div>
+        <div class="link-item">
+          <strong>Link 4:</strong> 
+          <a href="https://netpitch.africa/live/liverpool-chelsea" target="_blank">liverpool-chelsea</a>
+        </div>
+        <div class="link-item">
+          <strong>Link 5:</strong> 
+          <a href="https://netpitch.africa/live/champions-final" target="_blank">champions-final</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="koala-icon"></div>
+        <span class="text-2xl font-bold text-green-700">Net Pitch</span>
+      </div>
+      <div class="hidden md:flex space-x-6">
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="home">Home</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="tv-room">TV Room</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="reels">Reels</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="fan-zone">Fan Zone</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="vault">Mini Vault</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="profile">Profile</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="premium">Premium</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="store">Store</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="live">Go Live</a>
+        <a href="#" class="nav-link text-gray-700 hover:text-green-600" data-target="contact">Contact</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="dark-mode-toggle" class="text-gray-700 hover:text-green-600">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button id="signin-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">Sign In</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sign In Modal -->
+  <div id="signin-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4 text-center">Sign In to Net Pitch</h3>
+      <div class="space-y-4">
+        <button id="champions-login" class="w-full bg-blue-600 text-white py-2 rounded">Champions League App</button>
+        <div class="flex items-center">
+          <hr class="flex-grow border-gray-300">
+          <span class="px-2 text-sm text-gray-500">or</span>
+          <hr class="flex-grow border-gray-300">
+        </div>
+        <input type="email" id="email-input" placeholder="Email Address" class="w-full p-2 border rounded">
+        <button id="email-login" class="w-full net-btn py-2 rounded">Continue with Email</button>
+        <p class="text-xs text-gray-500 text-center">By signing in, you agree to our Terms of Service and Privacy Policy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KYC Verification Modal -->
+  <div id="kyc-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Complete KYC Verification</h3>
+      <p class="text-sm mb-4">To access premium features and withdrawals, please verify your identity.</p>
+      <input type="text" id="full-name" placeholder="Full Name" class="w-full p-2 border rounded mb-3">
+      <input type="text" id="phone" placeholder="Phone (+254...)" class="w-full p-2 border rounded mb-3">
+      <input type="text" id="id-number" placeholder="National ID Number" class="w-full p-2 border rounded mb-3">
+      <button id="submit-kyc" class="w-full net-btn py-2 rounded">Submit Verification</button>
+    </div>
+  </div>
+
+  <!-- Create Profile Modal -->
+  <div id="profile-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Create Your Profile</h3>
+      <div class="text-center mb-4">
+        <img id="profile-preview" src="https://placehold.co/100x100/2E8B57/FFFFFF?text=U" alt="Profile Preview" class="w-20 h-20 rounded-full mx-auto mb-2"/>
+        <input type="file" id="profile-pic" class="w-full p-2 border rounded text-sm" accept="image/*">
+      </div>
+      <input type="text" id="username" placeholder="Username" class="w-full p-2 border rounded mb-3">
+      <input type="text" id="nickname" placeholder="Nickname" class="w-full p-2 border rounded mb-3">
+      <button id="save-profile" class="w-full net-btn py-2 rounded">Save Profile</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="pt-24 pb-16">
+
+    <!-- Home Page -->
+    <section data-page="home" class="py-16 text-center overlay text-white">
+      <div class="container mx-auto px-6">
+        <h1 class="text-5xl font-bold mb-6 text-green-300">Net the Game. Share the Glory.</h1>
+        <p class="text-xl mb-8">Africa's premier football IQ platform — watch live, go live, net tweets, and earn IQ Admirers.</p>
+        <button class="net-btn px-8 py-4 rounded-full text-xl font-semibold shadow-lg" onclick="showPage('tv-room')">Watch Live Now</button>
+      </div>
+    </section>
+
+    <!-- TV Room (Live) -->
+    <section data-page="tv-room" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">📺 TV Room</h2>
+        <p class="text-center mb-6 text-gray-300">Today's Live Matches</p>
+        
+        <!-- Live Player -->
+        <div id="live-player" class="live-player hidden">
+          <video id="stream-video" controls autoplay>
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <!-- Today's Matches -->
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+          <div class="bg-gray-800 p-6 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold text-white">Arsenal vs Man Utd</h3>
+            <p class="text-gray-300">Premier League • 15:00 EAT</p>
+            <div class="mt-4">
+              <span class="inline-block bg-red-500 text-white px-3 py-1 rounded-full text-sm">🔴 LIVE</span>
+            </div>
+            <button class="mt-4 net-btn px-6 py-2 rounded" onclick="playLiveStream('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', 'Arsenal vs Man Utd')">
+              Watch Live
+            </button>
+            <div class="mt-2">
+              <input type="text" id="stream-link-1" value="https://netpitch.africa/live/arsenal-manutd" class="w-full p-2 border rounded text-sm bg-gray-700 text-white border-gray-600" readonly/>
+              <div class="flex space-x-2 mt-1">
+                <button class="text-xs text-blue-400" onclick="copyToClipboard('stream-link-1')">Copy Link</button>
+                <button class="text-xs text-green-400" onclick="pasteLink('stream-link-1')">Paste</button>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold text-white">Gor Mahia vs AFC Leopards</h3>
+            <p class="text-gray-300">Kenyan Premier League • 17:30 EAT</p>
+            <div class="mt-4">
+              <span class="inline-block bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">🟡 UPCOMING</span>
+            </div>
+            <button class="mt-4 net-btn px-6 py-2 rounded" onclick="playLiveStream('https://sample-videos.com/video123/mp4/720/sample_720.mp4', 'Gor Mahia vs AFC Leopards')">
+              Watch Live
+            </button>
+            <div class="mt-2">
+              <input type="text" id="stream-link-2" value="https://netpitch.africa/live/gor-afc" class="w-full p-2 border rounded text-sm bg-gray-700 text-white border-gray-600" readonly/>
+              <div class="flex space-x-2 mt-1">
+                <button class="text-xs text-blue-400" onclick="copyToClipboard('stream-link-2')">Copy Link</button>
+                <button class="text-xs text-green-400" onclick="pasteLink('stream-link-2')">Paste</button>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold text-white">Barcelona vs Real Madrid</h3>
+            <p class="text-gray-300">La Liga • 20:00 EAT</p>
+            <div class="mt-4">
+              <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">🔵 UPCOMING</span>
+            </div>
+            <button class="mt-4 net-btn px-6 py-2 rounded" onclick="playLiveStream('https://sample-videos.com/video123/mp4/720/sample_720.mp4', 'Barcelona vs Real Madrid')">
+              Set Reminder
+            </button>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-xl shadow-md">
+            <h3 class="text-xl font-semibold text-white">Liverpool vs Chelsea</h3>
+            <p class="text-gray-300">Premier League • 22:30 EAT</p>
+            <div class="mt-4">
+              <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">🔵 UPCOMING</span>
+            </div>
+            <button class="mt-4 net-btn px-6 py-2 rounded" onclick="playLiveStream('https://sample-videos.com/video123/mp4/720/sample_720.mp4', 'Liverpool vs Chelsea')">
+              Set Reminder
+            </button>
+          </div>
+        </div>
+
+        <!-- League Standings -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow">
+          <h3 class="text-xl font-bold mb-4 text-white">🏆 League Standings</h3>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div>
+              <h4 class="font-semibold text-green-300 mb-3">Premier League</h4>
+              <table class="w-full text-sm">
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">1. Arsenal</td>
+                  <td class="text-right">89 pts</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">2. Liverpool</td>
+                  <td class="text-right">86 pts</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">3. City</td>
+                  <td class="text-right">78 pts</td>
+                </tr>
+                <tr>
+                  <td class="py-2">4. United</td>
+                  <td class="text-right">72 pts</td>
+                </tr>
+              </table>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-300 mb-3">La Liga</h4>
+              <table class="w-full text-sm">
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">1. Real Madrid</td>
+                  <td class="text-right">88 pts</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">2. Barcelona</td>
+                  <td class="text-right">82 pts</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">3. Atletico</td>
+                  <td class="text-right">75 pts</td>
+                </tr>
+                <tr>
+                  <td class="py-2">4. Betis</td>
+                  <td class="text-right">68 pts</td>
+                </tr>
+              </table>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-300 mb-3">KPL</h4>
+              <table class="w-full text-sm">
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">1. Gor Mahia</td>
+                  <td class="text-right">67 pts</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">2. AFC Leopards</td>
+                  <td class="text-right">65 pts</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                  <td class="py-2">3. Sofapaka</td>
+                  <td class="text-right">58 pts</td>
+                </tr>
+                <tr>
+                  <td class="py-2">4. Bandari</td>
+                  <td class="text-right">55 pts</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Selection -->
+        <div class="mt-8 bg-gray-800 p-6 rounded-xl shadow">
+          <h3 class="text-xl font-bold mb-4 text-white">🌟 Favorite Player</h3>
+          <p class="text-gray-300 mb-4">Select your favorite player to follow their stats and highlights:</p>
+          <div class="grid md:grid-cols-4 gap-4">
+            <div class="player-card text-center p-4 rounded-lg cursor-pointer" onclick="selectPlayer(this, 'Haaland')">
+              <img src="https://placehold.co/80x80/2E8B57/FFFFFF?text=H" alt="Haaland" class="w-16 h-16 rounded-full mx-auto mb-2"/>
+              <p class="font-semibold">Haaland</p>
+              <p class="text-xs text-gray-400">Man City</p>
+            </div>
+            <div class="player-card text-center p-4 rounded-lg cursor-pointer" onclick="selectPlayer(this, 'Messi')">
+              <img src="https://placehold.co/80x80/3CB371/FFFFFF?text=M" alt="Messi" class="w-16 h-16 rounded-full mx-auto mb-2"/>
+              <p class="font-semibold">Messi</p>
+              <p class="text-xs text-gray-400">Inter Miami</p>
+            </div>
+            <div class="player-card text-center p-4 rounded-lg cursor-pointer" onclick="selectPlayer(this, 'Son')">
+              <img src="https://placehold.co/80x80/2E8B57/FFFFFF?text=S" alt="Son" class="w-16 h-16 rounded-full mx-auto mb-2"/>
+              <p class="font-semibold">Son</p>
+              <p class="text-xs text-gray-400">Tottenham</p>
+            </div>
+            <div class="player-card text-center p-4 rounded-lg cursor-pointer" onclick="selectPlayer(this, 'Pulisic')">
+              <img src="https://placehold.co/80x80/3CB371/FFFFFF?text=P" alt="Pulisic" class="w-16 h-16 rounded-full mx-auto mb-2"/>
+              <p class="font-semibold">Pulisic</p>
+              <p class="text-xs text-gray-400">AC Milan</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reels Page (TikTok Style) -->
+    <section data-page="reels" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">🎥 Reels</h2>
+        
+        <!-- Search Bar -->
+        <div class="search-container mb-8">
+          <input type="text" id="reels-search" placeholder="Search users..." class="search-input" onkeyup="searchUsers('reels')">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+        
+        <div class="reel-container">
+          
+          <!-- Reel 1 -->
+          <div class="reel-item flex items-center justify-center relative">
+            <img src="https://images.unsplash.com/photo-1508093937551-228956d88448?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Reel" class="w-full h-full object-cover"/>
+            <div class="absolute bottom-8 left-4 flex items-end space-x-4">
+              <div class="text-sm">
+                <p class="font-bold">Haaland Smashes It!</p>
+                <p class="text-xs">From: @PremierLeagueFan</p>
+                <p class="text-xs mt-1">🔥 4.5K likes • 🧠 1.2K IQ</p>
+              </div>
+            </div>
+            <div class="absolute right-4 bottom-8 space-y-6">
+              <div class="text-center">
+                <i class="fas fa-heart text-2xl like-btn"></i>
+                <p class="text-xs mt-1">4.5K</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-comment text-2xl"></i>
+                <p class="text-xs mt-1">230</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-retweet text-2xl"></i>
+                <p class="text-xs mt-1">1.2K</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-download text-2xl"></i>
+                <p class="text-xs mt-1">Download</p>
+              </div>
+            </div>
+            <!-- Comments -->
+            <div class="absolute top-4 left-4 right-4 bg-black bg-opacity-70 text-white p-2 rounded">
+              <p class="text-xs">Comments:</p>
+              <div class="comment-section text-xs mt-1">
+                <p><span class="font-bold">@NairobiFan:</span> What a goal! 🔥</p>
+                <p><span class="font-bold">@GoalKing:</span> Haaland is unstoppable!</p>
+                <p><span class="font-bold">@FootballIQ:</span> 98% shot accuracy in this match.</p>
+              </div>
+              <div class="flex mt-2">
+                <input type="text" placeholder="Reply..." class="flex-1 p-1 text-xs bg-transparent border-b border-white outline-none"/>
+                <button class="ml-2 text-xs text-blue-400"><i class="fas fa-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reel 2 -->
+          <div class="reel-item flex items-center justify-center relative">
+            <img src="https://images.unsplash.com/photo-1527011052649-44563136b98c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Reel" class="w-full h-full object-cover"/>
+            <div class="absolute bottom-8 left-4 flex items-end space-x-4">
+              <div class="text-sm">
+                <p class="font-bold">Fan Celebrates in Kibera</p>
+                <p class="text-xs">From: @NairobiUnited</p>
+                <p class="text-xs mt-1">🎉 Local Hero • 🧠 890 IQ</p>
+              </div>
+            </div>
+            <div class="absolute right-4 bottom-8 space-y-6">
+              <div class="text-center">
+                <i class="fas fa-heart text-2xl like-btn"></i>
+                <p class="text-xs mt-1">3.2K</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-comment text-2xl"></i>
+                <p class="text-xs mt-1">180</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-retweet text-2xl"></i>
+                <p class="text-xs mt-1">450</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-download text-2xl"></i>
+                <p class="text-xs mt-1">Download</p>
+              </div>
+            </div>
+            <!-- Comments -->
+            <div class="absolute top-4 left-4 right-4 bg-black bg-opacity-70 text-white p-2 rounded">
+              <p class="text-xs">Comments:</p>
+              <div class="comment-section text-xs mt-1">
+                <p><span class="font-bold">@KiberaPride:</span> This is our boy! 🇰🇪</p>
+                <p><span class="font-bold">@StreetFootball:</span> Best celebration ever!</p>
+              </div>
+              <div class="flex mt-2">
+                <input type="text" placeholder="Reply..." class="flex-1 p-1 text-xs bg-transparent border-b border-white outline-none"/>
+                <button class="ml-2 text-xs text-blue-400"><i class="fas fa-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reel 3 -->
+          <div class="reel-item flex items-center justify-center relative">
+            <img src="https://images.unsplash.com/photo-1543109766-4363a4b8b18a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Reel" class="w-full h-full object-cover"/>
+            <div class="absolute bottom-8 left-4 flex items-end space-x-4">
+              <div class="text-sm">
+                <p class="font-bold">Last Minute Winner!</p>
+                <p class="text-xs">From: @FootballIQ</p>
+                <p class="text-xs mt-1">🏆 CL Final • 🧠 2.1K IQ</p>
+              </div>
+            </div>
+            <div class="absolute right-4 bottom-8 space-y-6">
+              <div class="text-center">
+                <i class="fas fa-heart text-2xl like-btn"></i>
+                <p class="text-xs mt-1">6.7K</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-comment text-2xl"></i>
+                <p class="text-xs mt-1">420</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-retweet text-2xl"></i>
+                <p class="text-xs mt-1">1.8K</p>
+              </div>
+              <div class="text-center">
+                <i class="fas fa-download text-2xl"></i>
+                <p class="text-xs mt-1">Download</p>
+              </div>
+            </div>
+            <!-- Comments -->
+            <div class="absolute top-4 left-4 right-4 bg-black bg-opacity-70 text-white p-2 rounded">
+              <p class="text-xs">Comments:</p>
+              <div class="comment-section text-xs mt-1">
+                <p><span class="font-bold">@FinalHero:</span> Unbelievable finish!</p>
+                <p><span class="font-bold">@Champions:</span> What a way to win the cup!</p>
+              </div>
+              <div class="flex mt-2">
+                <input type="text" placeholder="Reply..." class="flex-1 p-1 text-xs bg-transparent border-b border-white outline-none"/>
+                <button class="ml-2 text-xs text-blue-400"><i class="fas fa-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+        <!-- Blocked Users Section -->
+        <div class="blocked-section">
+          <div class="blocked-header">
+            <h4 class="font-bold">Blocked Users</h4>
+            <span id="blocked-count">0 users</span>
+          </div>
+          <div id="blocked-users-list">
+            <!-- Blocked users will appear here -->
+            <p class="text-gray-400 text-center py-4">No blocked users</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fan Zone -->
+    <section data-page="fan-zone" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6 fan-zone-content">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">💬 Fan Zone</h2>
+        
+        <!-- Search Bar -->
+        <div class="search-container mb-8">
+          <input type="text" id="fanzone-search" placeholder="Search users..." class="search-input" onkeyup="searchUsers('fan-zone')">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+        
+        <!-- Post Box -->
+        <div class="max-w-2xl mx-auto transparent-post p-5 rounded-xl shadow mb-8">
+          <textarea id="post-input" class="w-full p-3 border rounded-lg mb-3 bg-transparent text-white border-gray-600 placeholder-gray-400" rows="3" placeholder="What's on your football mind?"></textarea>
+          <button class="net-btn px-6 py-2 rounded" onclick="createPost()">Post</button>
+        </div>
+
+        <!-- Posts Feed -->
+        <div id="posts-feed" class="max-w-2xl mx-auto space-y-6">
+          <!-- Posts will be added here -->
+        </div>
+        
+        <!-- Blocked Users Section -->
+        <div class="blocked-section">
+          <div class="blocked-header">
+            <h4 class="font-bold">Blocked Users</h4>
+            <span id="blocked-count-fanzone">0 users</span>
+          </div>
+          <div id="blocked-users-list-fanzone">
+            <!-- Blocked users will appear here -->
+            <p class="text-gray-400 text-center py-4">No blocked users</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mini Vault -->
+    <section data-page="vault" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6 max-w-lg">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">💰 Mini Vault</h2>
+        <div class="bg-gray-800 p-6 rounded-xl shadow">
+          <p class="text-center text-2xl font-bold">Balance: <span id="balance" class="text-green-400">350.00 KES</span></p>
+          
+          <!-- Binance Integration -->
+          <div class="mt-4 p-4 bg-gray-700 rounded-lg">
+            <h3 class="font-semibold mb-2">💱 Binance Integration</h3>
+            <p class="text-sm mb-3">Link your Binance account to deposit/withdraw funds</p>
+            <div class="flex space-x-2">
+              <input type="text" placeholder="Binance UID" class="flex-1 p-2 rounded bg-gray-600 text-white border-gray-600 text-sm"/>
+              <button class="net-btn py-2 px-4 text-sm">Link Account</button>
+            </div>
+          </div>
+
+          <!-- KYC Verification -->
+          <div class="mt-6 p-4 bg-gray-700 rounded-lg">
+            <h3 class="font-semibold mb-2">🔐 KYC Verification</h3>
+            <p class="text-sm mb-3">Verify your identity to withdraw funds</p>
+            <button id="verify-kyc" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm">Verify Identity</button>
+            <p id="kyc-status" class="text-xs text-gray-400 mt-2 hidden">✅ Verified</p>
+          </div>
+
+          <!-- Currency Converter -->
+          <div class="mt-6 p-4 bg-gray-700 rounded-lg">
+            <h3 class="font-semibold mb-2">💱 Currency Converter</h3>
+            <input type="number" id="convert-amount" placeholder="Enter amount" class="w-full p-2 rounded bg-gray-600 text-white text-sm mb-2"/>
+            <select id="convert-from" class="w-full p-2 rounded bg-gray-600 text-white text-sm mb-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="UGX">UGX</option>
+              <option value="TZS">TZS</option>
+            </select>
+            <div class="text-center my-2 text-sm">=</div>
+            <div id="convert-result" class="w-full p-2 rounded bg-gray-600 text-center text-sm">0.00 KES</div>
+            <button class="w-full net-btn py-2 rounded text-sm mt-3" onclick="convertCurrency()">Convert to KES</button>
+          </div>
+
+          <!-- Transactions -->
+          <div class="mt-6 space-y-4">
+            <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded text-sm" onclick="buyLinks()">Buy 10 Links (100 KES)</button>
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded text-sm" onclick="withdraw('paypal')">Withdraw to PayPal</button>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded text-sm" onclick="withdraw('bank')">Withdraw to Bank</button>
+          </div>
+          <p class="text-xs text-gray-400 mt-4 text-center">Transaction Tax: 0.2% | All balances in KES</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile Page -->
+    <section data-page="profile" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">👤 Your Profile</h2>
+        
+        <!-- Profile Header -->
+        <div class="max-w-lg mx-auto bg-gray-800 p-6 rounded-xl shadow text-center mb-8">
+          <div class="relative inline-block">
+            <img id="profile-pic-display" src="https://placehold.co/100x100/2E8B57/FFFFFF?text=U" alt="Profile" class="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-green-500"/>
+            <button onclick="changeProfilePic()" class="absolute bottom-0 right-0 bg-green-600 text-white p-1 rounded-full text-xs">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+          <h3 class="text-xl font-bold">User123</h3>
+          <p class="text-green-400">Nickname: GoalMaster</p>
+          <p class="text-sm text-gray-400">Favorite Player: <span id="favorite-player">Not Selected</span></p>
+          
+          <div class="mt-6 grid grid-cols-3 gap-4">
+            <div class="bg-gray-700 p-3 rounded">
+              <p class="text-sm">IQ Admirers</p>
+              <p class="text-xl font-bold">1,240</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded">
+              <p class="text-sm">Nets</p>
+              <p class="text-xl font-bold">892</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded">
+              <p class="text-sm">Likes</p>
+              <p class="text-xl font-bold">3.2K</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Chart -->
+        <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-xl shadow mb-8">
+          <h3 class="text-xl font-bold mb-4">📊 Account Activity</h3>
+          <canvas id="activity-chart" height="100"></canvas>
+        </div>
+
+        <!-- Other User Profiles -->
+        <div class="max-w-4xl mx-auto">
+          <h3 class="text-xl font-bold mb-4">Other Fans</h3>
+          
+          <div class="user-profile">
+            <div class="flex items-center space-x-4">
+              <img src="https://placehold.co/60x60/3CB371/FFFFFF?text=J" alt="User" class="w-12 h-12 rounded-full"/>
+              <div class="flex-1">
+                <h4 class="font-bold">JohnFootball</h4>
+                <p class="text-sm">Nickname: King of Dribbles</p>
+                <p class="text-xs">IQ Admirers: 890 • Nets: 540 • Likes: 2.1K</p>
+              </div>
+              <button class="net-btn px-4 py-1 text-sm" onclick="viewProfile('JohnFootball')">View Profile</button>
+            </div>
+          </div>
+
+          <div class="user-profile">
+            <div class="flex items-center space-x-4">
+              <img src="https://placehold.co/60x60/2E8B57/FFFFFF?text=M" alt="User" class="w-12 h-12 rounded-full"/>
+              <div class="flex-1">
+                <h4 class="font-bold">MaryKicks</h4>
+                <p class="text-sm">Nickname: SheShoots</p>
+                <p class="text-xs">IQ Admirers: 1,560 • Nets: 1,200 • Likes: 4.8K</p>
+              </div>
+              <button class="net-btn px-4 py-1 text-sm" onclick="viewProfile('MaryKicks')">View Profile</button>
+            </div>
+          </div>
+
+          <div class="user-profile">
+            <div class="flex items-center space-x-4">
+              <img src="https://placehold.co/60x60/3CB371/FFFFFF?text=T" alt="User" class="w-12 h-12 rounded-full"/>
+              <div class="flex-1">
+                <h4 class="font-bold">TitoDefender</h4>
+                <p class="text-sm">Nickname: Wall of Steel</p>
+                <p class="text-xs">IQ Admirers: 670 • Nets: 320 • Likes: 1.4K</p>
+              </div>
+              <button class="net-btn px-4 py-1 text-sm" onclick="viewProfile('TitoDefender')">View Profile</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Premium Page -->
+    <section data-page="premium" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6 max-w-4xl">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">🌟 Premium Membership</h2>
+        <p class="text-center mb-8">Unlock exclusive features and elevate your football IQ</p>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+          <!-- Basic Tier -->
+          <div class="bg-gray-800 p-6 rounded-xl shadow text-center">
+            <h3 class="text-xl font-bold mb-2">Basic</h3>
+            <p class="text-2xl font-bold mb-4">100 KES <span class="text-sm font-normal">/month</span></p>
+            <ul class="text-sm space-y-2 mb-6">
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Download Reels</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Ad-Free Experience</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Priority Support</li>
+              <li class="flex items-center justify-center text-gray-500"><i class="fas fa-times mr-2"></i> Create Communities</li>
+              <li class="flex items-center justify-center text-gray-500"><i class="fas fa-times mr-2"></i> Monetize Streams</li>
+            </ul>
+            <button class="w-full net-btn py-2 rounded" onclick="upgradeTo('Basic')">Choose Basic</button>
+          </div>
+          
+          <!-- Pro Tier -->
+          <div class="bg-gray-800 p-6 rounded-xl shadow text-center border-2 border-green-500">
+            <h3 class="text-xl font-bold mb-2">Pro <span class="text-xs bg-green-500 text-white px-2 py-1 rounded">Popular</span></h3>
+            <p class="text-2xl font-bold mb-4">250 KES <span class="text-sm font-normal">/month</span></p>
+            <ul class="text-sm space-y-2 mb-6">
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Download Reels</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Ad-Free Experience</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Priority Support</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Create Communities</li>
+              <li class="flex items-center justify-center text-gray-500"><i class="fas fa-times mr-2"></i> Monetize Streams</li>
+            </ul>
+            <button class="w-full net-btn py-2 rounded" onclick="upgradeTo('Pro')">Choose Pro</button>
+          </div>
+          
+          <!-- Premium Tier -->
+          <div class="bg-gray-800 p-6 rounded-xl shadow text-center">
+            <h3 class="text-xl font-bold mb-2">Premium</h3>
+            <p class="text-2xl font-bold mb-4">500 KES <span class="text-sm font-normal">/month</span></p>
+            <ul class="text-sm space-y-2 mb-6">
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Download Reels</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Ad-Free Experience</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Priority Support</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Create Communities</li>
+              <li class="flex items-center justify-center"><i class="fas fa-check text-green-400 mr-2"></i> Monetize Streams</li>
+            </ul>
+            <button class="w-full net-btn py-2 rounded" onclick="upgradeTo('Premium')">Choose Premium</button>
+          </div>
+        </div>
+        
+        <div class="mt-8 bg-gray-800 p-6 rounded-xl shadow">
+          <h3 class="text-xl font-bold mb-4">💡 Why Go Premium?</h3>
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <h4 class="font-semibold">Download Reels</h4>
+              <p>Save AI-generated highlights to your gallery and share offline.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold">Create Communities</h4>
+              <p>Build your fan base and share exclusive live streams with members.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold">Monetize Your Streams</h4>
+              <p>Charge fans 10 KES per link to access your live football games.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold">Priority Support</h4>
+              <p>Get faster responses from our contact center team.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Store Page -->
+    <section data-page="store" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6 max-w-4xl">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">🛍️ Net Pitch Store</h2>
+        <p class="text-center mb-8">Promote your favorite teams and earn commissions</p>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Store Items -->
+          <div>
+            <h3 class="text-xl font-bold mb-4">Available Merchandise</h3>
+            <div class="space-y-4">
+              <div class="bg-gray-800 p-4 rounded-lg flex items-center">
+                <img src="https://placehold.co/80x80/2E8B57/FFFFFF?text=⚽" alt="Jersey" class="w-16 h-16 mr-4"/>
+                <div class="flex-1">
+                  <h4 class="font-bold">Premier League Jersey</h4>
+                  <p class="text-sm">1,500 KES</p>
+                </div>
+                <button class="net-btn px-4 py-2 text-sm" onclick="addToStore('Premier League Jersey')">Add to Store</button>
+              </div>
+              
+              <div class="bg-gray-800 p-4 rounded-lg flex items-center">
+                <img src="https://placehold.co/80x80/3CB371/FFFFFF?text=👟" alt="Shoes" class="w-16 h-16 mr-4"/>
+                <div class="flex-1">
+                  <h4 class="font-bold">Football Cleats</h4>
+                  <p class="text-sm">3,200 KES</p>
+                </div>
+                <button class="net-btn px-4 py-2 text-sm" onclick="addToStore('Football Cleats')">Add to Store</button>
+              </div>
+              
+              <div class="bg-gray-800 p-4 rounded-lg flex items-center">
+                <img src="https://placehold.co/80x80/2E8B57/FFFFFF?text=🧢" alt="Cap" class="w-16 h-16 mr-4"/>
+                <div class="flex-1">
+                  <h4 class="font-bold">Team Cap</h4>
+                  <p class="text-sm">800 KES</p>
+                </div>
+                <button class="net-btn px-4 py-2 text-sm" onclick="addToStore('Team Cap')">Add to Store</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Your Store Link -->
+          <div>
+            <h3 class="text-xl font-bold mb-4">Your Store Link</h3>
+            <div class="bg-gray-800 p-6 rounded-lg">
+              <p class="text-sm mb-3">Share this link on your social media to earn commissions:</p>
+              <input type="text" id="store-link" value="https://netpitch.africa/store/user123" class="w-full p-2 border rounded bg-gray-700 text-white border-gray-600 mb-3" readonly/>
+              <div class="flex space-x-2">
+                <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm" onclick="copyToClipboard('store-link')">Copy Link</button>
+                <button class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded text-sm" onclick="generateQR('store-link')">Generate QR</button>
+              </div>
+              <div class="mt-4 text-center">
+                <p class="text-sm">Current Earnings: <span class="font-bold text-green-400">1,250 KES</span></p>
+                <p class="text-xs text-gray-400">15% commission on all sales</p>
+              </div>
+            </div>
+            
+            <!-- Sales Chart -->
+            <div class="mt-6 bg-gray-800 p-6 rounded-lg">
+              <h4 class="font-bold mb-3">Sales Performance</h4>
+              <canvas id="sales-chart" height="100"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Go Live Page -->
+    <section data-page="live" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6 max-w-4xl">
+        <h2 class="text-3xl font-bold mb-8 text-center text-green-300">🎥 Go Live</h2>
+        <p class="text-center mb-8">Share your football moments with IQ Admirers</p>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Live Setup -->
+          <div class="bg-gray-800 p-6 rounded-xl shadow">
+            <h3 class="text-xl font-bold mb-4">Start Broadcasting</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold mb-2">Stream Title</label>
+                <input type="text" id="stream-title" placeholder="My Street Football Game" class="w-full p-2 border rounded bg-gray-700 text-white border-gray-600"/>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold mb-2">Description</label>
+                <textarea id="stream-desc" placeholder="Join me for a friendly match in the neighborhood..." class="w-full p-2 border rounded bg-gray-700 text-white border-gray-600" rows="3"></textarea>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold mb-2">Visibility</label>
+                <select id="stream-visibility" class="w-full p-2 border rounded bg-gray-700 text-white border-gray-600">
+                  <option value="public">Public (Everyone can view)</option>
+                  <option value="community">Community Only</option>
+                  <option value="private">Private (Link only)</option>
+                </select>
+              </div>
+              
+              <div id="premium-notice" class="bg-yellow-900 text-yellow-200 p-3 rounded text-sm hidden">
+                <p><i class="fas fa-exclamation-triangle mr-2"></i>Premium users can monetize streams. Upgrade to charge fans 10 KES per view.</p>
+              </div>
+              
+              <button id="start-live" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold" onclick="startLiveStream()">
+                <i class="fas fa-circle text-xs mr-2"></i> Go Live
+              </button>
+            </div>
+          </div>
+          
+          <!-- Live Stream Preview -->
+          <div class="bg-gray-800 p-6 rounded-xl shadow">
+            <h3 class="text-xl font-bold mb-4">Stream Preview</h3>
+            <div class="bg-black rounded-lg mb-4" style="height: 300px; display: flex; align-items: center; justify-content: center;">
+              <p class="text-gray-500">Camera feed will appear here</p>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-sm">Viewers:</span>
+                <span id="viewer-count" class="font-bold">0</span>
+              </div>
+              
+              <div class="flex justify-between">
+                <span class="text-sm">Duration:</span>
+                <span id="duration">00:00</span>
+              </div>
+              
+              <div class="flex justify-between">
+                <span class="text-sm">Earnings:</span>
+                <span id="earnings" class="font-bold text-green-400">0 KES</span>
+              </div>
+              
+              <div class="flex space-x-2">
+                <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded text-sm" onclick="toggleCamera()">
+                  <i class="fas fa-video mr-1"></i> Camera
+                </button>
+                <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded text-sm" onclick="toggleMic()">
+                  <i class="fas fa-microphone mr-1"></i> Mic
+                </button>
+              </div>
+              
+              <button id="end-live" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 rounded font-semibold hidden" onclick="endLiveStream()">
+                End Stream
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stream Link -->
+        <div class="mt-8 bg-gray-800 p-6 rounded-xl shadow">
+          <h3 class="text-xl font-bold mb-4">Share Your Stream</h3>
+          <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <input type="text" id="stream-share-link" value="" class="flex-1 p-2 border rounded bg-gray-700 text-white border-gray-600" readonly/>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded" onclick="copyToClipboard('stream-share-link')">Copy Link</button>
+            <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded" onclick="generateQR('stream-share-link')">Generate QR</button>
+          </div>
+          <p class="text-xs text-gray-400 mt-2">Share this link with your fans to join your live stream</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section data-page="contact" class="py-16 overlay text-white hidden">
+      <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-bold mb-6">📞 Contact Centre</h2>
+        <p class="mb-6">Need help? Reach out to our support team.</p>
+        <div class="space-y-4 text-lg">
+          <p><i class="fas fa-envelope"></i> harmingworld@gmail.com</p>
+          <p><i class="fab fa-whatsapp"></i> WhatsApp: +254726442203</p>
+          <p><i class="fab fa-weixin"></i> WeChat: +254726442203</p>
+        </div>
+        <form id="contact-form" class="max-w-md mx-auto mt-8 space-y-4">
+          <input type="text" placeholder="Your Name" class="w-full p-3 rounded bg-gray-700 text-white border-gray-600" required/>
+          <input type="email" placeholder="Your Email" class="w-full p-3 rounded bg-gray-700 text-white border-gray-600" required/>
+          <textarea placeholder="Your Message" class="w-full p-3 rounded bg-gray-700 text-white border-gray-600" rows="4" required></textarea>
+          <button type="submit" class="w-full net-btn py-3 rounded" onclick="sendMessage(event)">Send Message</button>
+        </form>
+        <p id="form-status" class="mt-4 text-green-400 hidden">Message sent successfully!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white py-8">
+    <div class="container mx-auto px-6 text-center">
+      <div class="flex justify-center items-center space-x-2 mb-4">
+        <div class="koala-icon"></div>
+        <span class="text-xl font-bold">Net Pitch</span>
+      </div>
+      <p class="text-gray-400 text-sm">© 2025 Net Pitch. No Ads. No Betting. Pure Football.</p>
+      <div class="mt-4 space-x-4">
+        <a href="#" class="hover:text-green-400">Terms</a>
+        <a href="#" class="hover:text-green-400">Privacy</a>
+        <a href="#" class="hover:text-green-400">FAQ</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Dashboard Toggle
+    const dashboardToggle = document.getElementById('dashboard-toggle');
+    const dashboard = document.getElementById('dashboard');
+    
+    dashboardToggle.addEventListener('click', () => {
+      dashboard.classList.toggle('show');
+    });
+    
+    // Close dashboard when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dashboardToggle.contains(e.target) && !dashboard.contains(e.target)) {
+        dashboard.classList.remove('show');
+      }
+    });
+    
+    // Refresh Links
+    const refreshLinks = document.getElementById('refresh-links');
+    
+    refreshLinks.addEventListener('click', () => {
+      const linksContainer = document.getElementById('live-links-container');
+      const links = linksContainer.querySelectorAll('.link-item a');
+      
+      // Simulate refreshing links
+      links.forEach(link => {
+        const currentHref = link.getAttribute('href');
+        const newHref = currentHref + '?refresh=' + Date.now();
+        link.setAttribute('href', newHref);
+      });
+      
+      // Visual feedback
+      refreshLinks.innerHTML = '<i class="fas fa-check mr-1"></i> Refreshed';
+      setTimeout(() => {
+        refreshLinks.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Refresh';
+      }, 1500);
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage(link.dataset.target);
+        
+        // Close dashboard after navigation
+        dashboard.classList.remove('show');
+        
+        // Initialize charts when navigating to profile or store
+        if (link.dataset.target === 'profile') {
+          setTimeout(initActivityChart, 100);
+        } else if (link.dataset.target === 'store') {
+          setTimeout(initSalesChart, 100);
+        }
+      });
+    });
+
+    function showPage(page) {
+      document.querySelectorAll('[data-page]').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.querySelector(`[data-page="${page}"]`).style.display = 'block';
+      
+      // Reset TV Room when navigating away
+      if (page !== 'tv-room') {
+        document.getElementById('live-player').classList.add('hidden');
+        document.getElementById('stream-video').pause();
+      }
+      
+      // Update Go Live page based on premium status
+      if (page === 'live') {
+        updateLivePage();
+      }
+      
+      // Update blocked users count when navigating to fan zone or reels
+      if (page === 'fan-zone') {
+        updateBlockedUsers('fan-zone');
+        startFanZoneBackground();
+      } else if (page !== 'fan-zone') {
+        stopFanZoneBackground();
+      } else {
+        updateBlockedUsers(page);
+      }
+    }
+
+    // Sign In Modal
+    const signinModal = document.getElementById('signin-modal');
+    const signinBtn = document.getElementById('signin-btn');
+    
+    signinBtn.addEventListener('click', () => {
+      signinModal.style.display = 'block';
+    });
+    
+    window.addEventListener('click', (e) => {
+      if (e.target === signinModal) {
+        signinModal.style.display = 'none';
+      }
+    });
+    
+    // Champions League App Login
+    document.getElementById('champions-login').addEventListener('click', () => {
+      alert('Connecting to Champions League App...\nPlease confirm login in the app.');
+      signinModal.style.display = 'none';
+      // Simulate successful login
+      setTimeout(() => {
+        signinBtn.innerHTML = '<i class="fas fa-user-circle"></i>';
+        signinBtn.classList.remove('bg-green-600');
+        signinBtn.classList.add('bg-gray-600');
+        // Show profile modal after login
+        setTimeout(() => {
+          document.getElementById('profile-modal').style.display = 'block';
+        }, 500);
+      }, 1000);
+    });
+    
+    // Email Login
+    document.getElementById('email-login').addEventListener('click', () => {
+      const email = document.getElementById('email-input').value;
+      if (email && email.includes('@')) {
+        const code = Math.floor(100000 + Math.random() * 900000);
+        alert(`Login code ${code} has been sent to ${email}. Please check your inbox.`);
+        signinModal.style.display = 'none';
+        // Simulate successful login
+        setTimeout(() => {
+          signinBtn.innerHTML = '<i class="fas fa-user-circle"></i>';
+          signinBtn.classList.remove('bg-green-600');
+          signinBtn.classList.add('bg-gray-600');
+          // Show profile modal after login
+          setTimeout(() => {
+            document.getElementById('profile-modal').style.display = 'block';
+          }, 500);
+        }, 1000);
+      } else {
+        alert('Please enter a valid email address.');
+      }
+    });
+
+    // Save Profile
+    document.getElementById('save-profile').addEventListener('click', () => {
+      const username = document.getElementById('username').value;
+      const nickname = document.getElementById('nickname').value;
+      if (username && nickname) {
+        document.getElementById('profile-modal').style.display = 'none';
+        alert(`Profile created successfully!\nUsername: ${username}\nNickname: ${nickname}`);
+      } else {
+        alert('Please fill in all fields.');
+      }
+    });
+
+    // Handle profile picture preview
+    document.getElementById('profile-pic').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('profile-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Change profile picture
+    function changeProfilePic() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            document.getElementById('profile-pic-display').src = e.target.result;
+            alert('Profile picture updated successfully!');
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    }
+
+    // KYC Verification
+    document.getElementById('verify-kyc').addEventListener('click', () => {
+      document.getElementById('kyc-modal').style.display = 'block';
+    });
+
+    document.getElementById('submit-kyc').addEventListener('click', () => {
+      const name = document.getElementById('full-name').value;
+      const phone = document.getElementById('phone').value;
+      const id = document.getElementById('id-number').value;
+      
+      if (name && phone && id) {
+        if (phone.startsWith('+254') && phone.length === 13) {
+          const code = Math.floor(100000 + Math.random() * 900000);
+          alert(`Verification code ${code} has been sent to ${phone}. Please confirm to complete verification.`);
+          document.getElementById('kyc-modal').style.display = 'none';
+          document.getElementById('kyc-status').classList.remove('hidden');
+          document.getElementById('verify-kyc').disabled = true;
+          document.getElementById('verify-kyc').textContent = 'Verified';
+          document.getElementById('verify-kyc').classList.remove('bg-blue-600');
+          document.getElementById('verify-kyc').classList.add('bg-green-600');
+        } else {
+          alert('Please enter a valid Kenyan phone number (+254...).');
+        }
+      } else {
+        alert('Please fill in all fields.');
+      }
+    });
+
+    // Dark Mode Toggle
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+      const icon = document.getElementById('dark-mode-toggle').querySelector('i');
+      if (icon.classList.contains('fa-moon')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        document.body.classList.add('dark-mode');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        document.body.classList.remove('dark-mode');
+      }
+    });
+
+    // Play Live Stream
+    function playLiveStream(streamUrl, title) {
+      const player = document.getElementById('live-player');
+      const video = document.getElementById('stream-video');
+      
+      player.classList.remove('hidden');
+      video.src = streamUrl;
+      video.load();
+      video.play();
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.title = `${title} - Live | Net Pitch`;
+    }
+
+    // Copy to Clipboard
+    function copyToClipboard(elementId) {
+      const element = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
+      const text = element.value || element.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        prompt('Copy to clipboard: Ctrl+C, Enter', text);
+      });
+    }
+
+    // Paste Link
+    function pasteLink(elementId) {
+      navigator.clipboard.readText().then(text => {
+        if (text && text.includes('netpitch')) {
+          document.getElementById(elementId).value = text;
+          alert('Link pasted successfully!');
+        } else {
+          alert('No valid Net Pitch link found in clipboard.');
+        }
+      }).catch(err => {
+        alert('Failed to read clipboard. Please paste manually.');
+      });
+    }
+
+    // Generate QR Code
+    function generateQR(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.value;
+      alert(`QR code generated for: ${text}\n\nIn a real app, this would display a QR code image.`);
+    }
+
+    // View Profile
+    function viewProfile(username) {
+      alert(`Viewing profile: ${username}\n\nIn a real app, this would show ${username}'s full profile with their posts, reels, and stats.`);
+    }
+
+    // Select Player
+    function selectPlayer(element, playerName) {
+      // Remove selected class from all player cards
+      document.querySelectorAll('.player-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked card
+      element.classList.add('selected');
+      
+      // Update favorite player in profile
+      document.getElementById('favorite-player').textContent = playerName;
+      alert(`You've selected ${playerName} as your favorite player! You'll now receive updates and highlights about them.`);
+    }
+
+    // Net Animation
+    function showNetAnimation() {
+      const animation = document.getElementById('net-animation');
+      animation.style.opacity = '1';
+      setTimeout(() => {
+        animation.style.opacity = '0';
+      }, 1500);
+    }
+
+    // Upgrade to Premium
+    function upgradeTo(tier) {
+      alert(`You've selected the ${tier} plan!\n\nPlease proceed to Mini Vault to complete your payment of ${document.querySelector('[onclick="upgradeTo(\'' + tier + '\')"]').parentElement.querySelector('.text-2xl').textContent.split(' ')[0]} KES.`);
+      showPage('vault');
+    }
+
+    // Add to Store
+    function addToStore(item) {
+      const promotedItems = document.getElementById('promoted-items');
+      const newItem = document.createElement('div');
+      newItem.className = 'bg-gray-700 p-2 rounded text-sm';
+      newItem.textContent = `• ${item}`;
+      promotedItems.appendChild(newItem);
+      alert(`${item} has been added to your store! Share your store link to start earning.`);
+    }
+
+    // Initialize Activity Chart
+    function initActivityChart() {
+      const ctx = document.getElementById('activity-chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Posts',
+            data: [3, 5, 2, 6, 4, 7, 5],
+            borderColor: '#2E8B57',
+            backgroundColor: 'rgba(46, 139, 87, 0.1)',
+            tension: 0.4
+          }, {
+            label: 'Reels Watched',
+            data: [8, 12, 15, 10, 18, 14, 20],
+            borderColor: '#3CB371',
+            backgroundColor: 'rgba(60, 179, 113, 0.1)',
+            tension: 0.4
+          }, {
+            label: 'Nets',
+            data: [5, 8, 6, 12, 9, 15, 11],
+            borderColor: '#2E8B57',
+            borderDash: [5, 5],
+            backgroundColor: 'rgba(46, 139, 87, 0.05)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: 'white'
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'white'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'white'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize Sales Chart
+    function initSalesChart() {
+      const ctx = document.getElementById('sales-chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Sales (KES)',
+            data: [850, 1200, 950, 1400, 1100, 1650],
+            backgroundColor: 'rgba(46, 139, 87, 0.7)',
+            borderColor: '#2E8B57',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: 'white'
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'white'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'white'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Update Go Live Page
+    function updateLivePage() {
+      const isPremium = confirm('Are you a premium user? (Click OK for Yes, Cancel for No)');
+      const premiumNotice = document.getElementById('premium-notice');
+      const streamShareLink = document.getElementById('stream-share-link');
+      
+      if (isPremium) {
+        premiumNotice.classList.remove('hidden');
+        streamShareLink.value = 'https://netpitch.africa/live/user123?premium=10KES';
+      } else {
+        premiumNotice.classList.add('hidden');
+        streamShareLink.value = 'https://netpitch.africa/live/user123';
+      }
+    }
+
+    // Start Live Stream
+    let liveInterval;
+    function startLiveStream() {
+      const title = document.getElementById('stream-title').value;
+      if (!title) {
+        alert('Please enter a stream title');
+        return;
+      }
+      
+      document.getElementById('start-live').style.display = 'none';
+      document.getElementById('end-live').style.display = 'block';
+      
+      // Simulate viewers and earnings
+      let viewers = 0;
+      let earnings = 0;
+      let seconds = 0;
+      
+      document.getElementById('viewer-count').textContent = '0';
+      document.getElementById('earnings').textContent = '0 KES';
+      document.getElementById('duration').textContent = '00:00';
+      
+      liveInterval = setInterval(() => {
+        // Randomly increase viewers
+        if (Math.random() > 0.7) {
+          viewers += Math.floor(Math.random() * 3) + 1;
+          document.getElementById('viewer-count').textContent = viewers;
+        }
+        
+        // Increment duration
+        seconds++;
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('duration').textContent = `${mins}:${secs}`;
+        
+        // Add earnings for premium users
+        const isPremium = document.getElementById('premium-notice').classList.contains('hidden') === false;
+        if (isPremium && seconds % 60 === 0) {  // Every minute
+          earnings += 10;
+          document.getElementById('earnings').textContent = `${earnings} KES`;
+        }
+      }, 1000);
+      
+      alert(`Live stream started: "${title}"\n\nShare your stream link to invite viewers!`);
+    }
+
+    // End Live Stream
+    function endLiveStream() {
+      clearInterval(liveInterval);
+      document.getElementById('start-live').style.display = 'block';
+      document.getElementById('end-live').style.display = 'none';
+      
+      const earnings = document.getElementById('earnings').textContent;
+      alert(`Stream ended!\n\nTotal earnings: ${earnings}\nDuration: ${document.getElementById('duration').textContent}`);
+    }
+
+    // Toggle Camera/Mic
+    function toggleCamera() {
+      alert('Camera toggled');
+    }
+    
+    function toggleMic() {
+      alert('Microphone toggled');
+    }
+
+    // Fan Zone Posts
+    const postsFeed = document.getElementById('posts-feed');
+    const postInput = document.getElementById('post-input');
+
+    function createPost() {
+      const content = postInput.value.trim();
+      if (!content) return;
+
+      const post = document.createElement('div');
+      post.className = 'transparent-post p-5 rounded-xl shadow';
+      post.innerHTML = `
+        <div class="flex items-center space-x-3 mb-2">
+          <img src="https://placehold.co/40x40/2E8B57/FFFFFF?text=U" alt="User" class="rounded-full"/>
+          <div>
+            <p class="font-semibold text-white">@User${Math.floor(Math.random() * 1000)}</p>
+            <p class="text-sm text-gray-400">IQ Score: <span class="iq-score">${Math.floor(Math.random() * 2000)}</span></p>
+          </div>
+        </div>
+        <p class="text-white">${content}</p>
+        <div class="flex space-x-6 mt-3 text-sm">
+          <button class="text-blue-400"><i class="fas fa-comment"></i> Reply</button>
+          <button class="text-green-400 font-semibold" onclick="netPost(this)"><i class="fas fa-retweet"></i> Net (0)</button>
+          <button class="text-gray-400 like-btn" onclick="likePost(this)"><i class="fas fa-heart"></i> 0</button>
+        </div>
+        <div class="mt-3 border-t border-gray-600 pt-3">
+          <div class="flex items-center space-x-2">
+            <img src="https://placehold.co/30x30/2E8B57/FFFFFF?text=R" alt="Reply" class="w-6 h-6 rounded-full"/>
+            <input type="text" placeholder="Add a reply..." class="flex-1 p-1 text-sm bg-transparent border-b border-white outline-none"/>
+            <button class="text-xs text-blue-400"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      `;
+      postsFeed.prepend(post);
+      postInput.value = '';
+    }
+
+    function netPost(btn) {
+      let count = parseInt(btn.textContent.split('(')[1]);
+      btn.innerHTML = `<i class="fas fa-retweet"></i> Net (${++count})`;
+      // Update IQ Admirers based on nets
+      if (count % 10 === 0) {
+        alert(`Great! You've reached ${count} nets! Your IQ Admirers are growing!`);
+      }
+      // Show net animation
+      showNetAnimation();
+    }
+
+    function likePost(btn) {
+      let count = parseInt(btn.textContent.replace('❤️ ', ''));
+      btn.innerHTML = `<i class="fas fa-heart"></i> ${++count}`;
+    }
+
+    // Mini Vault Logic
+    let balance = 350.00;
+    let isVerified = false;
+
+    function updateBalance() {
+      document.getElementById('balance').textContent = balance.toFixed(2) + ' KES';
+    }
+
+    // Currency Converter
+    function convertCurrency() {
+      const amount = parseFloat(document.getElementById('convert-amount').value);
+      const from = document.getElementById('convert-from').value;
+      
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
+      
+      let rate;
+      switch(from) {
+        case 'USD': rate = 120; break;
+        case 'EUR': rate = 130; break;
+        case 'GBP': rate = 150; break;
+        case 'UGX': rate = 0.033; break;
+        case 'TZS': rate = 0.05; break;
+        default: rate = 120;
+      }
+      
+      const ksh = (amount * rate).toFixed(2);
+      document.getElementById('convert-result').textContent = `${ksh} KES`;
+      
+      if (confirm(`Convert ${amount} ${from} to ${ksh} KES (fee: ${(ksh * 0.002).toFixed(2)} KES)?`)) {
+        const fee = ksh * 0.002;
+        balance += parseFloat(ksh) - fee;
+        updateBalance();
+        alert(`${amount} ${from} converted to ${ksh} KES. Fee: ${fee.toFixed(2)} KES applied.`);
+      }
+    }
+
+    function buyLinks() {
+      if (balance >= 100) {
+        balance -= 100;
+        alert('Successfully purchased 10 stream links!');
+        updateBalance();
+      } else {
+        alert('Insufficient balance in Mini Vault.');
+      }
+    }
+
+    function withdraw(method) {
+      if (!isVerified) {
+        alert('Please complete KYC verification before withdrawing funds.');
+        showPage('vault');
+        return;
+      }
+      
+      const amount = prompt(`Enter amount to withdraw to ${method.toUpperCase()}:`);
+      if (amount && !isNaN(amount) && parseFloat(amount) <= balance) {
+        const fee = parseFloat(amount) * 0.002;
+        balance -= (parseFloat(amount) + fee);
+        const code = Math.floor(100000 + Math.random() * 900000);
+        alert(`Withdrew ${amount} KES to ${method.toUpperCase()}. Fee: ${fee.toFixed(2)} KES.\nConfirmation code: ${code} sent to your email and phone.`);
+        updateBalance();
+      } else if (amount) {
+        alert('Invalid amount or insufficient balance.');
+      }
+    }
+
+    // Contact Form
+    function sendMessage(e) {
+      e.preventDefault();
+      const email = document.querySelector('#contact-form input[type="email"]').value;
+      const code = Math.floor(100000 + Math.random() * 900000);
+      alert(`Message sent to harmingworld@gmail.com from ${email}. Verification code ${code} sent to your email.\nWe'll reply soon!`);
+      document.getElementById('form-status').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('contact-form').reset();
+        document.getElementById('form-status').classList.add('hidden');
+      }, 2000);
+    }
+    
+    // Search Users Function
+    function searchUsers(page) {
+      const searchInput = document.getElementById(`${page === 'reels' ? 'reels' : 'fanzone'}-search`);
+      const searchTerm = searchInput.value.toLowerCase();
+      
+      if (searchTerm.length < 2) {
+        return;
+      }
+      
+      // In a real app, this would search through user database
+      // For demo purposes, we'll show a mock search result
+      const mockUsers = [
+        { username: 'JohnFootball', nickname: 'King of Dribbles', iq: 890 },
+        { username: 'MaryKicks', nickname: 'SheShoots', iq: 1560 },
+        { username: 'TitoDefender', nickname: 'Wall of Steel', iq: 670 },
+        { username: 'NairobiFan', nickname: 'Local Hero', iq: 450 },
+        { username: 'GoalKing', nickname: 'Sharp Shooter', iq: 1200 }
+      ];
+      
+      const results = mockUsers.filter(user => 
+        user.username.toLowerCase().includes(searchTerm) || 
+        user.nickname.toLowerCase().includes(searchTerm)
+      );
+      
+      if (results.length > 0) {
+        let resultsHtml = '<div class="bg-gray-800 p-4 rounded-lg mt-4">';
+        resultsHtml += `<p class="text-sm mb-2">Found ${results.length} user(s):</p>`;
+        results.forEach(user => {
+          resultsHtml += `
+            <div class="flex items-center justify-between p-2 border-b border-gray-700 last:border-b-0">
+              <div>
+                <p class="font-semibold text-white">@${user.username}</p>
+                <p class="text-sm text-gray-400">${user.nickname} • 🧠 ${user.iq}</p>
+              </div>
+              <div class="flex space-x-2">
+                <button class="text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded" onclick="viewProfile('${user.username}')">View</button>
+                <button class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded" onclick="blockUser('${user.username}', '${page}')">Block</button>
+              </div>
+            </div>
+          `;
+        });
+        resultsHtml += '</div>';
+        
+        // Add results after search input
+        const searchContainer = searchInput.parentElement;
+        const existingResults = searchContainer.querySelector('.search-results');
+        if (existingResults) {
+          existingResults.remove();
+        }
+        
+        const resultsDiv = document.createElement('div');
+        resultsDiv.className = 'search-results';
+        resultsDiv.innerHTML = resultsHtml;
+        searchContainer.appendChild(resultsDiv);
+      }
+    }
+    
+    // Block User Function
+    let blockedUsers = [];
+    
+    function blockUser(username, page) {
+      if (!blockedUsers.includes(username)) {
+        blockedUsers.push(username);
+        alert(`You have blocked @${username}. You will no longer see their content.`);
+        
+        // Remove search results
+        const searchContainer = document.querySelector(`#${page === 'reels' ? 'reels' : 'fanzone'}-search`).parentElement;
+        const resultsDiv = searchContainer.querySelector('.search-results');
+        if (resultsDiv) {
+          resultsDiv.remove();
+        }
+        
+        // Update blocked users list
+        updateBlockedUsers(page);
+      }
+    }
+    
+    // Unblock User Function
+    function unblockUser(username) {
+      blockedUsers = blockedUsers.filter(user => user !== username);
+      alert(`You have unblocked @${username}.`);
+      updateBlockedUsers();
+    }
+    
+    // Update Blocked Users List
+    function updateBlockedUsers(page) {
+      const listId = page === 'reels' ? 'blocked-users-list' : 'blocked-users-list-fanzone';
+      const countId = page === 'reels' ? 'blocked-count' : 'blocked-count-fanzone';
+      
+      const list = document.getElementById(listId);
+      const count = document.getElementById(countId);
+      
+      if (blockedUsers.length === 0) {
+        list.innerHTML = '<p class="text-gray-400 text-center py-4">No blocked users</p>';
+        count.textContent = '0 users';
+      } else {
+        let listHtml = '';
+        blockedUsers.forEach(username => {
+          listHtml += `
+            <div class="blocked-user">
+              <span>@${username}</span>
+              <button class="unblock-btn" onclick="unblockUser('${username}')">Unblock</button>
+            </div>
+          `;
+        });
+        list.innerHTML = listHtml;
+        count.textContent = `${blockedUsers.length} user${blockedUsers.length === 1 ? '' : 's'}`;
+      }
+    }
+    
+    // Fan Zone Background
+    const fanZoneBg = document.getElementById('fan-zone-bg');
+    const clubLogos = [
+      'https://upload.wikimedia.org/wikipedia/en/thumb/5/5c/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/Barcelona_2015.svg/1200px-Barcelona_2015.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Liverpool_FC_logo.svg/1200px-Liverpool_FC_logo.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/1200px-Manchester_City_FC_badge.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Arsenal_F.C._logo.svg/1200px-Arsenal_F.C._logo.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Chelsea_FC.svg/1200px-Chelsea_FC.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Tottenham_Hotspur.svg/1200px-Tottenham_Hotspur.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/AFC_Bournemouth.svg/1200px-AFC_Bournemouth.svg.png',
+      'https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/West_Ham_United_FC.svg/1200px-West_Ham_United_FC.svg.png'
+    ];
+    
+    let currentLogoIndex = 0;
+    let backgroundInterval;
+    
+    function startFanZoneBackground() {
+      // Set initial background
+      fanZoneBg.style.backgroundImage = `url('${clubLogos[currentLogoIndex]}')`;
+      
+      // Change background every 5 seconds
+      backgroundInterval = setInterval(() => {
+        currentLogoIndex = (currentLogoIndex + 1) % clubLogos.length;
+        fanZoneBg.style.backgroundImage = `url('${clubLogos[currentLogoIndex]}')`;
+      }, 5000);
+    }
+    
+    function stopFanZoneBackground() {
+      if (backgroundInterval) {
+        clearInterval(backgroundInterval);
+      }
+    }
+  </script>
+
+</body>
+</html>
